@@ -1,0 +1,51 @@
+# The pure-Python tier only: no database, no Odoo, no provider, no credentials. The integration and Odoo tiers need
+# PostgreSQL, the fixture templates and your own Odoo Enterprise trees, and are opt-in (tests/conftest.py).
+name: tests
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: python -m pip install -e ".[dev]"
+      - run: ruff check .
+      - run: python -m pytest -q -rs
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - run: python -m pip install build
+      - run: python -m build
+      - name: the wheel carries the bundled data
+        run: python -m zipfile -l dist/*.whl | grep -E "agent_review/_bundled/(config/pricing.yaml|scenarios/reassign-opportunities.yaml|profiles/run/odoo20-standin-example.yaml|fixtures/odoo20/load_fixture.py)"
+      - name: install the wheel in a fresh environment and use it outside the checkout
+        run: |
+          python -m venv /tmp/wheel-env
+          /tmp/wheel-env/bin/pip install dist/*.whl
+          cd /tmp
+          /tmp/wheel-env/bin/agent-review --help
+          /tmp/wheel-env/bin/agent-review scenarios
+          /tmp/wheel-env/bin/agent-review profiles
+          /tmp/wheel-env/bin/agent-review fixture-script 20
+  release-gate:
+    # Red while README.md still opens with a DRAFT release-gate block: a repository carrying it is not
+    # cleared for publication. The owner removes the whole block when every item in it is cleared.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: README.md carries no release-gate block
+        run: "! grep -q 'RELEASE-GATE:BEGIN' README.md"

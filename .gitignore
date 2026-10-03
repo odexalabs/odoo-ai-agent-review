@@ -1,0 +1,34 @@
+# Python and tooling
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Run output: PRIVATE evidence (run.json, raw_diff.json, odoo.log, odoo.conf, standin.jsonl). Never commit it.
+runs/
+agent-review-runs/
+
+# Your own configuration: run profiles with local paths and credentials, template build configs, keys
+*.local.yaml
+my-*.yaml
+profiles/local/
+/template.conf
+fixtures/template.conf
+.env
+.env.*
+*.key
+*.pem
+
+
+# Editors and operating systems
+.DS_Store
+.idea/
+.vscode/

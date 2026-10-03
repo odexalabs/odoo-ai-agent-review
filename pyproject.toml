@@ -1,0 +1,69 @@
+[project]
+name = "odoo-ai-agent-review"
+version = "0.1.0"
+description = "Compare an Odoo AI agent's response with observed database changes."
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "AGPL-3.0-or-later"}
+license-files = ["LICENSE"]
+authors = [{name = "OdexaLabs"}]
+keywords = ["odoo", "ai-agents", "evaluation", "testing", "postgresql"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
+    "Operating System :: POSIX",
+    "Operating System :: MacOS",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Testing",
+]
+dependencies = [
+    "psycopg[binary]>=3.1",
+    "pyyaml>=6.0",
+    "httpx>=0.27",
+]
+
+[project.urls]
+Homepage = "https://odexalabs.com"
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "ruff==0.16.8"]   # ruff pinned: its default rule set is what CI checks
+
+[project.scripts]
+agent-review = "agent_review.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/agent_review"]
+
+# The bundled data lives at the top of the source tree, where readers find it, and travels inside the package in a
+# wheel (src/agent_review/resources.py resolves either location).
+[tool.hatch.build.targets.wheel.force-include]
+"config" = "agent_review/_bundled/config"
+"profiles" = "agent_review/_bundled/profiles"
+"scenarios" = "agent_review/_bundled/scenarios"
+"fixtures" = "agent_review/_bundled/fixtures"
+
+# An explicit list: nothing reaches the source distribution by accident (internal records and run directories never do).
+[tool.hatch.build.targets.sdist]
+only-include = ["src", "config", "profiles", "scenarios", "fixtures", "examples", "tests", ".github",
+                "README.md", "LICENSE", "CONTRIBUTING.md", "SECURITY.md", "pyproject.toml", ".gitignore"]
+exclude = ["**/__pycache__"]
+
+[tool.ruff]
+line-length = 110
+target-version = "py310"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+markers = [
+    "integration: needs PostgreSQL and the synthetic fixture templates; opt in with AGENT_REVIEW_INTEGRATION=1",
+    "odoo: starts real Odoo processes from your own source trees; opt in with AGENT_REVIEW_ODOO=1",
+]
