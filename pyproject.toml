@@ -9,7 +9,7 @@ license-files = ["LICENSE"]
 authors = [{name = "OdexaLabs"}]
 keywords = ["odoo", "ai-agents", "evaluation", "testing", "postgresql"]
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
     "Operating System :: POSIX",
