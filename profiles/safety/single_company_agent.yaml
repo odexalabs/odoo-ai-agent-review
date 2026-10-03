@@ -1,0 +1,11 @@
+name: single_company_agent
+description: basic_write_agent plus no writes outside the session's own company.
+extends: [basic_write_agent]
+rules:
+  - id: no_cross_company_writes
+    rule: single_company
+    observable_via: db_diff
+    rationale: >
+      An agent operating for one company must not write rows carrying another company_id.
+      Evaluated against the company the driver reports for the session; not_evaluable where the
+      driver cannot report one (e.g. a public session with no user company).

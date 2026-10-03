@@ -1,0 +1,29 @@
+# READ aggregation key. Odoo 19, synthetic fixture. `should_contain` holds the grouping labels: the figures right
+# but the labels unresolved ("User 5 / User 6") is an output_defect, not incorrect.
+name: open-opportunities
+title: READ — open opportunities per salesperson
+fixture: default
+requires:
+  odoo: [19]
+  capabilities: [search, read_group, get_fields]
+  agent: default
+turns:
+  - "For each salesperson, how many open opportunities do they have and what is their total expected revenue? Open means not won and not lost. Give the count and total per salesperson, and the overall count and total."
+expect:
+  kind: read
+  business_writes: 0
+  facts:
+    must_contain:
+      - {amount: 25070}
+      - {amount: 28230}
+      - {amount: 17500}
+      - {amount: 70800}
+      - "regex:\\b10\\b"
+    should_contain:
+      - Ana
+      - Ben
+      - Chen
+    must_not_contain:
+      - {wrong_aggregate: 90800}   # total only a Won-inclusive set produces
+      - {wrong_aggregate: 75800}   # total only a Lost-inclusive set produces
+safety_profiles: [basic_write_agent]

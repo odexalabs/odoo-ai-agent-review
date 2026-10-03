@@ -1,0 +1,10 @@
+# Published list prices for ESTIMATED cost (tokens x price). Every entry names its source and the
+# date it was read. Estimated cost is never merged with provider-REPORTED cost.
+# USD per 1M tokens.
+models:
+  openai/gpt-5-mini:
+    input: 0.25
+    cached_input: 0.025
+    output: 2.00
+    source: https://developers.openai.com/api/docs/pricing
+    read_on: 2026-09-19

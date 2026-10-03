@@ -1,0 +1,47 @@
+# Odoo 20: the native agent through a LOCAL STAND-IN for Odoo's AI endpoint. On each run's disposable copy the tool
+# replaces every IAP token with a synthetic run token and points `ai.endpoint` at a stand-in it starts for that run;
+# the stand-in calls YOUR provider with the one key named below. The Odoo process never receives a key.
+# This evaluates Odoo 20's local agent implementation through your model connection. Odoo's hosted AI service (IAP)
+# is not supported and not evaluated: not its model selection, billing, prompt processing or retries.
+# Copy it with `agent-review init-profile odoo20-standin-example`, then set every value marked EDIT.
+name: odoo20-standin-example
+description: Odoo 20 native agent through the local stand-in (copy and edit)
+driver: native_ai_20
+transport: standin                         # required, and the only value the Odoo 20 driver accepts
+mode: customer
+target:
+  odoo_root: /path/to/odoo-20.0            # EDIT: an Odoo 20 source tree (odoo-bin) or packaged tree (setup/odoo)
+  python: /path/to/odoo20-venv/bin/python  # EDIT
+fixture:
+  backend: postgres_template
+  execution_role: agent_review_exec        # EDIT if needed
+  admin_dsn: dbname=postgres
+  templates:
+    default: agent_review_tpl20            # EDIT: the prepared Odoo 20 fixture template (fixtures/README.md)
+agents:
+  default:
+    xml_id: ai.ai_default_agent            # Odoo 20's default agent, opened from the systray AI button
+    interface_key: systray_ai_button
+    session: internal
+    operator_login: evalop                 # the synthetic fixture's test-only operator (fixtures/odoo20)
+    operator_password: evalop-20-run
+provider:
+  name: openai                             # the stand-in speaks OpenAI Chat Completions
+  model: gpt-5-mini-2025-08-07             # what the stand-in requests; a dated snapshot keeps runs comparable
+  price_as: gpt-5-mini                     # which config/pricing.yaml entry prices it
+  base_url: https://api.openai.com/v1      # https, or plain http on 127.0.0.1 only (a local test provider)
+  reasoning_effort: medium                 # "high" when Odoo asks the model to think longer; null to omit the parameter
+  key_file: null                           # null = the AGENT_REVIEW_PROVIDER_KEY environment variable
+  timeout_s: 300                           # per provider request
+standin:
+  turn_timeout_s: 300                      # how long one turn may take to settle
+planning:
+  estimated_usd_per_run: 0.03              # EDIT: your own estimate; it drives the spend guard, it is not a budget
+  estimated_usd_source: "rough estimate for the bundled Odoo 20 scenario on gpt-5-mini; replace with your own"
+  spend_cap_usd: 5.00
+egress:
+  allowed_endpoints: ["127.0.0.1 (the stand-in, from the Odoo process)", "api.openai.com (from the stand-in only)"]
+invariants: [posted_moves_balanced, invoice_residual_consistent]
+repeat: 1
+# report_rules:                            # the exact messages YOUR deployment shows users, per verdict
+#   success: ["regex:<a reply your agent gives when it reports success>"]

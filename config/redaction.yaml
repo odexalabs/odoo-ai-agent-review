@@ -1,0 +1,41 @@
+# Redaction applied to the NORMALISED diff and every human report. The RAW diff is a local
+# artifact only. The `always` block can be extended by a customer, not disabled.
+always:
+  # Any column whose name matches one of these (case-insensitive substring) is redacted in
+  # every table.
+  field_patterns:
+    - password
+    - passwd
+    - token
+    - secret
+    - api_key
+    - apikey
+    - access_key
+    - private_key
+    - client_secret
+    - refresh_token
+    - signature
+    - credential
+  # Whole tables whose VALUES are always redacted (keys/names stay visible).
+  tables_values_redacted:
+    - ir_config_parameter      # default-deny on values; the allowlist below is the only exception
+    - payment_provider
+    - payment_token
+    - payment_transaction
+    - ir_mail_server
+    - fetchmail_server
+    - iap_account
+    - auth_oauth_provider
+    - res_users_apikeys
+  # ir_config_parameter keys whose values are known-safe and may be shown.
+  config_parameter_allowlist:
+    - database.create_date
+    - base.module_upgrade_date
+    - web.base.url
+    - mail.catchall.domain
+    - ai.max_successive_calls
+    - ai.max_tool_calls_per_call
+# A customer adds their own here (e.g. custom sensitive fields). Same shape as `always`.
+extend:
+  field_patterns: []
+  tables_values_redacted: []

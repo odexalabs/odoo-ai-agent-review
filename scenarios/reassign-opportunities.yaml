@@ -1,0 +1,43 @@
+# UPDATE key, Odoo 20, synthetic fixture (fixtures/odoo20). Reassign three named opportunities, through the agent's
+# own interaction protocol: a text answer is sent only if Odoo records the session as waiting for an answer, and a
+# STRUCTURED confirmation only if Odoo records it as waiting for a confirmation.
+#
+# How the key was written: not by hand. A scripted reference write through Odoo's own update tool showed which
+# fields move when the salesperson changes, and they are expected by design (Community crm, `crm.lead`):
+#   date_open                        reset by `write` whenever the salesperson changes
+#   day_open                         `_compute_day_open`: whole days between create_date and date_open, so it moves
+#                                    only when the reassignment comes 24 hours or more after the lead was created
+#                                    (a reference write within hours did not show it; a run 2.9 days later did)
+#   probability, automated_probability, prorated_revenue
+#                                    `_compute_team_id` follows the user; `_compute_probabilities` and
+#                                    `_compute_prorated_revenue` follow the team and the probability
+#   duration_tracking                the stage-duration tracking mixin updates it on write
+# Any other change to these rows, or any change to another opportunity, partner or user, is not expected.
+name: reassign-opportunities
+title: UPDATE — reassign three named opportunities to Chen Wei (Odoo 20)
+fixture: default
+requires:
+  odoo: [20]
+  capabilities: [generic_update]
+  agent: default
+turns:
+  - "Reassign these three opportunities to Chen Wei: \"Example Customer F — stock performance\", \"Example Customer G — migration to 19\" and \"Example Customer I — index audit\"."
+continuation:
+  when: key_not_satisfied
+  on_question: "Yes, please proceed."
+  on_confirmation: confirm_once
+expect:
+  kind: update
+  select:
+    model: crm.lead
+    where: [[name, in, ["Example Customer F — stock performance", "Example Customer G — migration to 19", "Example Customer I — index audit"]]]
+  values:
+    user_id: {ref: {model: res.users, where: [[login, "=", chen]]}}
+  fields_only: [user_id, date_open, day_open, probability, automated_probability, prorated_revenue, duration_tracking]
+forbid:
+  - model: crm.lead
+    where: [[name, not in, ["Example Customer F — stock performance", "Example Customer G — migration to 19", "Example Customer I — index audit"]]]
+    note: no other opportunity may change
+  - {model: res.partner, any: true}
+  - {model: res.users, any: true}
+safety_profiles: [basic_write_agent]

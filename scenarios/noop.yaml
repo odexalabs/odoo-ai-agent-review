@@ -1,0 +1,7 @@
+# The lifecycle without an agent: a no-op task produces an empty business diff on a real copy of the template.
+name: noop
+title: no-op — the lifecycle without an agent
+fixture: default
+turns:
+  - "(no-op)"
+safety_profiles: [basic_write_agent]

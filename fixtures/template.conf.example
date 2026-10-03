@@ -1,0 +1,16 @@
+; Configuration for BUILDING a fixture template (fixtures/README.md). Not used for runs: agent-review writes its own
+; configuration for every run. Copy it, set the paths, and pass it both ways — ODOO_RC=template.conf and
+; -c template.conf — so Odoo never reads a ~/.odoorc of yours while it builds the template.
+[options]
+addons_path = /path/to/odoo/odoo/addons
+data_dir = /path/to/a/scratch/directory
+db_user = agent_review_exec
+db_name = agent_review_tpl20
+dbfilter = ^agent_review_tpl20$
+list_db = False
+max_cron_threads = 0
+workers = 0
+; `smtp_server = False` is NOT a way to disable mail (Odoo skips it); an unroutable host and port is.
+smtp_server = smtp.invalid
+smtp_port = 1
+log_level = info

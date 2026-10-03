@@ -1,0 +1,19 @@
+# No agent, no provider, no spend: the lifecycle end to end (copy, snapshot, diff, grade, report, drop) on a real
+# copy of your fixture template. The quickest check that PostgreSQL and the template are set up correctly.
+name: noop
+description: no agent and no provider; exercises the lifecycle only
+driver: noop
+mode: customer
+target: {}
+fixture:
+  backend: postgres_template
+  execution_role: agent_review_exec        # EDIT if needed: the role that owns the run copies
+  admin_dsn: dbname=postgres
+  templates:
+    default: agent_review_tpl19            # EDIT: your fixture template (fixtures/README.md)
+agents:
+  default: {}
+  leads: {}
+provider: {name: none, model: none}
+repeat: 1
+invariants: [posted_moves_balanced, invoice_residual_consistent]

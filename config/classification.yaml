@@ -1,0 +1,80 @@
+# Diff classification rules. CONFIGURATION, not hardcode — a customer with tracked custom fields
+# extends this. Order of precedence: business > ai_session > bookkeeping.
+#
+# business_tables are snapshotted in full (EXACT coverage) and every change to them is a
+# "business write". Everything the scenario or the safety profile names is added to this set at
+# run time.
+business_tables:
+  - res_partner
+  - res_partner_bank
+  - crm_lead
+  - crm_tag
+  - crm_team
+  - crm_stage
+  - account_move
+  - account_move_line
+  - account_payment
+  - account_partial_reconcile
+  - account_journal
+  - account_account
+  - product_product
+  - product_template
+  - product_pricelist
+  - sale_order
+  - sale_order_line
+  - purchase_order
+  - purchase_order_line
+  - stock_quant
+  - stock_move
+  - stock_move_line
+  - stock_picking
+  - mrp_production
+  - project_project
+  - project_task
+  - hr_employee
+  - res_company
+  - res_users
+  - res_groups
+  - ir_config_parameter
+  - documents_document
+
+# AI / session bookkeeping: the conversation itself. Glob patterns on table names.
+ai_session_tables:
+  - mail_message
+  - mail_message_*
+  - mail_guest
+  - mail_notification
+  - bus_bus
+  - bus_presence
+  - discuss_channel
+  - discuss_channel_*
+  - im_livechat_*
+  - ai_*
+  - res_users_settings
+  - res_users_settings_*
+  - res_device*
+
+# Every other touched table is ordinary Odoo bookkeeping (sequences, attachments, tracking
+# values, mail queue, followers, ...). Listed patterns only label it; nothing is hidden.
+bookkeeping_labels:
+  ir_sequence*: sequence
+  ir_attachment: attachment
+  mail_tracking_value: tracking
+  mail_followers: followers
+  mail_mail: mail_queue
+  mail_activity*: activity
+  ir_logging: logging
+  res_users_log: login
+
+# Table -> Odoo model where Odoo's default `_table` rule (dots to underscores) does not apply.
+model_overrides:
+  ir_act_server: ir.actions.server
+  ir_act_window: ir.actions.act_window
+  ir_act_client: ir.actions.client
+  ir_act_url: ir.actions.act_url
+  ir_act_report_xml: ir.actions.report
+  ir_actions: ir.actions.actions
+  ir_ui_view: ir.ui.view
+  ir_ui_menu: ir.ui.menu
+  ir_model_fields: ir.model.fields
+  ir_config_parameter: ir.config_parameter

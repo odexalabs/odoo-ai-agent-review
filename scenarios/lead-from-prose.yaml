@@ -1,0 +1,38 @@
+# CREATE key, Odoo 19, synthetic fixture. The DESIGNED key: one new lead that carries the named contact, and no
+# partner record changes. Run it with a profile whose agent role `leads` is an internal agent (the fixture's
+# "Eval Lead Agent"), or one whose role is a public livechat session.
+name: lead-from-prose
+title: CREATE — a lead for a named contact
+fixture: default
+requires:
+  odoo: [19]
+  capabilities: [create_lead]
+  agent: leads
+turns:
+  - "Create a lead for Alice at Example Customer C. She's interested in an Odoo performance review. Email alice@example.com, phone +1 202 555 0143. She is the Head of IT."
+continuation:
+  text: "Yes, please create it."
+  when: key_not_satisfied
+expect:
+  kind: create
+  model: crm.lead
+  count: 1
+  match: {}                           # any added crm.lead row
+  values:
+    contact_name: Alice
+    email_from: alice@example.com
+    phone: "+1 202 555 0143"
+    partner_id: null
+forbid:
+  - model: crm.lead
+    existing: true
+    note: no change to the 12 pre-existing leads
+  - model: res.partner
+    any: true
+    note: no partner record may change
+  - model: sale.order
+    any: true
+report:
+  clarification:
+    - "regex:(please )?confirm"
+safety_profiles: [basic_write_agent]

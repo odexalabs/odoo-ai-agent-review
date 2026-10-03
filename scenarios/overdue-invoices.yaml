@@ -1,0 +1,38 @@
+# READ key: facts in the answer, zero business writes. Odoo 19, on the synthetic fixture (fixtures/odoo19).
+name: overdue-invoices
+title: READ — overdue invoices for Example Customer A
+fixture: default
+# The key depends on the fixture's due dates: July and August overdue, December not yet due.
+requires:
+  odoo: [19]
+  capabilities: [search, get_fields]
+  agent: default
+turns:
+  - "Which invoices for Example Customer A are overdue? Give invoice number, due date, outstanding amount, and the total."
+expect:
+  kind: read
+  business_writes: 0
+  facts:
+    must_contain:
+      - INV/2026/00002
+      - INV/2026/00003
+      - INV/2026/00005
+      - {amount: 1200.00}
+      - {amount: 2450.00}
+      - {amount: 780.50}
+      - {amount: 4430.50}
+    must_not_contain:
+      - INV/2026/00001        # paid in full
+      - INV/2026/00007        # not yet due
+      - INV/2026/00004        # Example Customer B
+      - INV/2026/00006        # Example Customer B
+      - {wrong_aggregate: 5429.50}   # a total only the set including the draft invoice produces
+      # `{amount: ...}` is refused here by the loader: a correct answer may name an amount it
+      # excludes (a correct answer has named the draft's 999.00 while excluding it). The
+      # identifiers above are a heuristic: a correct answer could mention INV/2026/00001 as
+      # "paid, excluded".
+report:
+  clarification:
+    - "regex:which (one|of these|company|partner|customer)"
+    - "regex:did you mean"
+safety_profiles: [basic_write_agent]

@@ -1,0 +1,48 @@
+# Odoo 19: the native agent, driven through the same HTTP calls the web client makes. The Odoo process calls your
+# provider itself, with the one key named below; on each run's disposable copy the tool pins the agent's model to
+# `provider.model` and removes any provider key stored in the database, so the named key is the only one.
+# Copy it with `agent-review init-profile odoo19-example`, then set every value marked EDIT.
+name: odoo19-example
+description: Odoo 19 native agent, direct provider call (copy and edit)
+driver: native_ai
+transport: direct
+mode: customer
+target:
+  odoo_root: /path/to/odoo-19.0            # EDIT: an Odoo 19 source tree (odoo-bin) or packaged tree (setup/odoo)
+  python: /path/to/odoo19-venv/bin/python  # EDIT: the interpreter that runs that tree
+  # addons_path: /path/to/odoo-19.0/odoo/addons,/path/to/more-addons    # default: <odoo_root>/odoo/addons
+fixture:
+  backend: postgres_template
+  execution_role: agent_review_exec        # EDIT if needed: the role Odoo connects as; it owns every run copy
+  admin_dsn: dbname=postgres               # how agent-review connects to create and drop run copies
+  # host: localhost                        # only if your cluster needs them
+  # port: 5432
+  # execution_password: ...
+  templates:
+    default: agent_review_tpl19            # EDIT: the prepared fixture template (fixtures/README.md)
+agents:
+  default:                                 # the agent role a scenario's `requires.agent: default` uses
+    xml_id: ai.ai_agent_natural_language_search
+    session: internal
+    operator_login: evalop                 # the synthetic fixture's test-only operator (fixtures/odoo19)
+    operator_password: evalop-19-run
+  leads:
+    name: Eval Lead Agent                  # created by the synthetic fixture script
+    session: internal
+    operator_login: evalop
+    operator_password: evalop-19-run
+provider:
+  name: openai                             # Odoo 19 reads the key from the environment variable the tool sets
+  model: gpt-5-mini                        # an alias: Odoo 19 does not log the served build, so reproducibility is limited
+  key_file: null                           # null = the AGENT_REVIEW_PROVIDER_KEY environment variable; never an ambient key
+  timeout_s: 900
+planning:
+  estimated_usd_per_run: 0.03              # EDIT: your own estimate. It drives the spend guard; it is not a budget
+  estimated_usd_source: "rough estimate for the bundled scenarios on gpt-5-mini; replace with your own"
+  spend_cap_usd: 5.00
+egress:
+  allowed_endpoints: [api.openai.com]
+invariants: [posted_moves_balanced, invoice_residual_consistent]
+repeat: 1
+# report_rules:                            # the exact messages YOUR deployment shows users, per verdict (README, "Scenarios and report rules")
+#   failure: ["<the exact message your Odoo posts when the AI cannot be reached>"]
